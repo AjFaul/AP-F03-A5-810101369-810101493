@@ -15,6 +15,50 @@ const int Y_PAGE=1024;
 //---------------------
 const string ADDRESS_IMG = "../img/";
 //---------------------
+const int START=1;
+const int INITIAL_TIME=2;
+const int IN_GAME=3;
+//---------------------
+const int CLOSE=0;
+const int MOUSE_LEFT=1;
+const int ARROW_UP=2;
+const int ARROW_DOWN=3;
+const int KEY_S=4;
+const int KEY_W=5;
+const int KEY_ENTER=6;
+//---------------------
+
+
+
+
+
+int handle_event(const Event & event){
+    if(event.type==sf::Event::Closed)
+        return 0;
+    
+    if(event.type==sf::Event::MouseButtonPressed)
+        if(event.mouseButton.button==Mouse::Left)
+            return 1;
+
+    if(event.type==Event::KeyPressed)
+    {
+        if(event.key.code==Keyboard::S)
+            return KEY_S;
+
+        if(event.key.code==Keyboard::W)
+            return KEY_W;
+        
+        if(event.key.code==Keyboard::Up)
+            return ARROW_UP;
+
+        if(event.key.code==Keyboard::Down)
+            return ARROW_DOWN;
+
+        if(event.key.code==Keyboard::Enter)
+            return KEY_ENTER;
+    }
+    return -1;
+}
 
 
 sf::Texture set_image(string filepath)
@@ -45,11 +89,40 @@ void start_game()
     textures=set_image(ADDRESS_IMG+"Start.png");
     Sprite sprite;
     sprite.setTexture(textures);
-
+    int status_game=START;
 
 
     while (window.isOpen())
     {
+        Event event;
+        while (window.pollEvent(event) && status_game==START)
+        {
+            if(handle_event(event)==CLOSE)
+                window.close();
+            
+            
+
+
+            
+        }
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
 
         update_window(window,sprite);
