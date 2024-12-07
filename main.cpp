@@ -49,6 +49,17 @@ public:
     ~Player(){}
 
     int get_health(){return health;}
+
+    int type_health(){
+        if(health<=25)
+            return 4;
+        else if( health<=50)
+            return 3;
+        else if(health <=75)
+            return 2;
+        else
+            return 1;
+    }
 };
 
 
