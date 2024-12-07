@@ -29,6 +29,14 @@ const int KEY_ENTER=6;
 //---------------------
 
 
+int checkMouseInRectangle_start(sf::RenderWindow &window) {
+    FloatRect targetRect(193,202,(709-193),(363-202));
+    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+    if (targetRect.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
+        return 1;
+    }
+    return 0;
+}
 
 
 
@@ -101,6 +109,7 @@ void start_game()
                 window.close();
             
             
+
 
 
             
