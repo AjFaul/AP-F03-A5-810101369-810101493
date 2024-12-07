@@ -21,13 +21,59 @@ const int IN_GAME=3;
 //---------------------
 const int CLOSE=0;
 const int MOUSE_LEFT=1;
-const int ARROW_UP=2;
-const int ARROW_DOWN=3;
-const int KEY_S=4;
-const int KEY_W=5;
-const int KEY_ENTER=6;
+const int ARROW_UP_OR_W=2;
+const int ARROW_DOWN_S=3;
+const int KEY_ENTER_OR_SPACE=4;
 //---------------------
-const int STOP_TIME_FIRST_GAME=10;
+const int STOP_TIME_FIRST_GAME=2;
+//---------------------
+const int LEFT_ARROW=0;
+const int RIGHT_ARROW=1;
+
+
+
+class Arrow
+{
+private:
+    float x,y;
+public:
+    Arrow(int type){
+        if(type==LEFT_ARROW)
+            x=30;
+        if(type==RIGHT_ARROW)
+            x=915;
+        y=212;
+    }
+
+    float event_handling(int type_op){
+        switch (type_op)
+        {
+        case ARROW_UP_OR_W:
+            y-=212;
+            if(y<=150)
+                y=828;
+            return 0;
+        case ARROW_DOWN_S:
+            y+=212;
+            if(y>=900)
+                y=212;
+            return 0;
+        case KEY_ENTER_OR_SPACE:
+            return y;
+        default:
+            return 0;
+        }
+    }
+
+    float get_pos_x(){return x;}
+
+    ~Arrow(){}
+};
+
+
+
+
+
 
 
 int checkMouseInRectangle_start(sf::RenderWindow &window) {
@@ -59,23 +105,22 @@ int handle_event(const Event & event){
     if(event.type==Event::KeyPressed)
     {
         if(event.key.code==Keyboard::S)
-            return KEY_S;
+            return ARROW_DOWN_S;
 
         if(event.key.code==Keyboard::W)
-            return KEY_W;
+            return ARROW_UP_OR_W;
         
         if(event.key.code==Keyboard::Up)
-            return ARROW_UP;
+            return ARROW_UP_OR_W;
 
         if(event.key.code==Keyboard::Down)
-            return ARROW_DOWN;
+            return ARROW_DOWN_S;
 
         if(event.key.code==Keyboard::Enter)
-            return KEY_ENTER;
+            return KEY_ENTER_OR_SPACE;
     }
     return -1;
 }
-
 
 sf::Texture set_image(string filepath)
 {
@@ -101,10 +146,25 @@ void update_window(sf::RenderWindow & window, Sprite sprites){
 void start_game()
 {
     RenderWindow window(VideoMode(X_PAGE,Y_PAGE),"Animal Figth");
+
+    //------------------------------------------------------
+
     Texture textures;
     textures=set_image(ADDRESS_IMG+"Start.png");
     Sprite sprite;
     sprite.setTexture(textures);
+
+    Texture logo_arrow_left;
+    logo_arrow_left=set_image(ADDRESS_IMG+"small_yang.png");
+    Sprite arrow_left_sprite(logo_arrow_left);
+
+    Texture logo_arrow_right;
+    logo_arrow_right=set_image(ADDRESS_IMG+"small_yang.png");
+    Sprite arrow_right_sprite(logo_arrow_right);
+
+
+    //------------------------------------------------------
+
     int status_game=START;
     Clock clock;
 
@@ -148,8 +208,54 @@ void start_game()
             update_window(window,sprite);
         }
         
-        
 
+
+        //----------------
+        Arrow arr_left(LEFT_ARROW);
+        arrow_left_sprite.setPosition(arr_left.get_pos_x(),arr_left.event_handling(KEY_ENTER_OR_SPACE));
+        //----------------
+        Arrow arr_right(RIGHT_ARROW);
+        arrow_right_sprite.setPosition(arr_right.get_pos_x(),arr_right.event_handling(KEY_ENTER_OR_SPACE));
+        //----------------
+        while (status_game==IN_GAME)
+        {
+            window.pollEvent(event);
+            textures=set_image(ADDRESS_IMG+"background.png");
+            sprite.setTexture(textures);
+            window.clear(Color::Black);
+            window.draw(sprite);
+            window.draw(arrow_left_sprite);
+            window.draw(arrow_right_sprite);
+
+
+            if(handle_event(event)==CLOSE)
+            {
+                window.close();
+                abort();
+            }
+
+
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            window.display();
+        }
+        
 
 
 
