@@ -38,7 +38,14 @@ int checkMouseInRectangle_start(sf::RenderWindow &window) {
     return 0;
 }
 
-
+int checkMouseInRectangle_exit(sf::RenderWindow &window) {
+    FloatRect targetRect(355,376,(632-355),(482-376));
+    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+    if (targetRect.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
+        return 1;
+    }
+    return 0;
+}
 
 int handle_event(const Event & event){
     if(event.type==sf::Event::Closed)
