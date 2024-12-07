@@ -201,8 +201,48 @@ void start_game()
     Texture logo_arrow_right;
     logo_arrow_right=set_image(ADDRESS_IMG+"small_yang.png");
     Sprite arrow_right_sprite(logo_arrow_right);
+//-------------------
+    Texture logo_health1;
+    logo_health1=set_image(ADDRESS_IMG+"health1.png");
+    Sprite health1_sprite(logo_health1);
+
+    Texture logo_health2;
+    logo_health2=set_image(ADDRESS_IMG+"health2.png");
+    Sprite health2_sprite(logo_health2);
+
+    Texture logo_health3;
+    logo_health3=set_image(ADDRESS_IMG+"health3.png");
+    Sprite health3_sprite(logo_health3);
+
+    Texture logo_health4;
+    logo_health4=set_image(ADDRESS_IMG+"health4.png");
+    Sprite health4_sprite(logo_health4);
+
+    vector<Sprite> health_sprite={health1_sprite,health2_sprite,health3_sprite,health4_sprite};
+//--------------------
+//--------------------
+    Texture flip_logo_health1;
+    flip_logo_health1=set_image(ADDRESS_IMG+"flip_health1.png");
+    Sprite flip_health1_sprite(flip_logo_health1);
+    flip_health1_sprite.setPosition(800.f,5.f);
+
+    Texture flip_logo_health2;
+    flip_logo_health2=set_image(ADDRESS_IMG+"flip_health2.png");
+    Sprite flip_health2_sprite(flip_logo_health2);
+    flip_health2_sprite.setPosition(800.f,5.f);
+
+    Texture flip_logo_health3;
+    flip_logo_health3=set_image(ADDRESS_IMG+"flip_health3.png");
+    Sprite flip_health3_sprite(flip_logo_health3);
+    flip_health3_sprite.setPosition(800.f,5.f);
+
+    Texture flip_logo_health4;
+    flip_logo_health4=set_image(ADDRESS_IMG+"flip_health4.png");
+    Sprite flip_health4_sprite(flip_logo_health4);
+    flip_health4_sprite.setPosition(800.f,5.f);
 
 
+    vector<Sprite> flip_health_sprite={flip_health1_sprite,flip_health2_sprite,flip_health3_sprite,flip_health4_sprite};
     //------------------------------------------------------
 
     int status_game=START;
@@ -260,6 +300,7 @@ void start_game()
         Player amirabas("amirabas");
         Player ali("ali");
         //----------------
+        //----------------
         while (status_game==IN_GAME)
         {
             window.pollEvent(event);
@@ -267,6 +308,7 @@ void start_game()
             textures=set_image(ADDRESS_IMG+"background.png");
             sprite.setTexture(textures);
             window.clear(Color::Black);
+
 
 
             window.draw(sprite);
@@ -294,6 +336,7 @@ void start_game()
             update_sprite(arrow_right_sprite,arr_right.get_pos_x(),arr_right.get_pos_y());
 
 
+            
 
 
 
@@ -306,8 +349,8 @@ void start_game()
 
 
 
-
-
+            window.draw(health_sprite[amirabas.type_health() -1]);
+            window.draw(flip_health_sprite[ali.type_health() -1]);
 
             window.display();
         }
