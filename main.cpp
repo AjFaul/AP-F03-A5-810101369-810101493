@@ -35,6 +35,28 @@ const int LEFT_ARROW=0;
 const int RIGHT_ARROW=1;
 
 
+class Player
+{
+private:
+    int health;
+    string name ;
+public:
+    Player(string name_player){
+        name=name_player;
+        health=100;
+    }
+
+    ~Player(){}
+
+    int get_health(){return health;}
+};
+
+
+
+
+
+
+
 
 class Arrow
 {
@@ -223,6 +245,9 @@ void start_game()
         //----------------
         Arrow arr_right(RIGHT_ARROW);
         arrow_right_sprite.setPosition(arr_right.get_pos_x(),arr_right.event_handling(KEY_ENTER_OR_SPACE));
+        //----------------
+        Player amirabas("amirabas");
+        Player ali("ali");
         //----------------
         while (status_game==IN_GAME)
         {
