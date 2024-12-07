@@ -114,12 +114,15 @@ void start_game()
         {
             if(handle_event(event)==CLOSE)
                 window.close();
-            
-            
-
-
-
-            
+            if(checkMouseInRectangle_start(window))
+                if(handle_event(event)==MOUSE_LEFT)
+                {
+                    status_game=INITIAL_TIME;
+                    break;
+                }
+            if(checkMouseInRectangle_exit(window) && status_game!=INITIAL_TIME)
+                if(handle_event(event)==MOUSE_LEFT)
+                    window.close();          
         }
         
 
