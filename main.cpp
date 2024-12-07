@@ -27,6 +27,7 @@ const int KEY_S=4;
 const int KEY_W=5;
 const int KEY_ENTER=6;
 //---------------------
+const int STOP_TIME_FIRST_GAME=10;
 
 
 int checkMouseInRectangle_start(sf::RenderWindow &window) {
@@ -105,7 +106,7 @@ void start_game()
     Sprite sprite;
     sprite.setTexture(textures);
     int status_game=START;
-
+    Clock clock;
 
     while (window.isOpen())
     {
@@ -124,6 +125,29 @@ void start_game()
                 if(handle_event(event)==MOUSE_LEFT)
                     window.close();          
         }
+
+        clock.restart();
+        int initial_times=STOP_TIME_FIRST_GAME;
+        while (status_game==INITIAL_TIME)
+        {
+            window.pollEvent(event);
+            if(handle_event(event)==CLOSE)
+            {
+                window.close();
+                abort();
+            }
+
+            if(clock.getElapsedTime().asSeconds()>=1.0f){
+                clock.restart();
+                textures=set_image(ADDRESS_IMG+to_string(initial_times)+".png");
+                sprite.setTexture(textures);
+                initial_times--;
+            }
+            if(initial_times==0)
+                status_game=IN_GAME;
+            update_window(window,sprite);
+        }
+        
         
 
 
