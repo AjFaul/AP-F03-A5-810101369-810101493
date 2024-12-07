@@ -24,6 +24,10 @@ const int MOUSE_LEFT=1;
 const int ARROW_UP_OR_W=2;
 const int ARROW_DOWN_S=3;
 const int KEY_ENTER_OR_SPACE=4;
+
+
+const int UP=5;
+const int DOWN=6;
 //---------------------
 const int STOP_TIME_FIRST_GAME=2;
 //---------------------
@@ -67,6 +71,7 @@ public:
 
     float get_pos_x(){return x;}
 
+    float get_pos_y(){return y;}
     ~Arrow(){}
 };
 
@@ -105,10 +110,10 @@ int handle_event(const Event & event){
     if(event.type==Event::KeyPressed)
     {
         if(event.key.code==Keyboard::S)
-            return ARROW_DOWN_S;
+            return DOWN;
 
         if(event.key.code==Keyboard::W)
-            return ARROW_UP_OR_W;
+            return UP;
         
         if(event.key.code==Keyboard::Up)
             return ARROW_UP_OR_W;
@@ -139,7 +144,9 @@ void update_window(sf::RenderWindow & window, Sprite sprites){
 }
 
 
-
+void update_sprite(Sprite& sprite,float x, float y){
+    sprite.setPosition(x,y);
+}
 
 
 
@@ -220,22 +227,35 @@ void start_game()
         while (status_game==IN_GAME)
         {
             window.pollEvent(event);
+
             textures=set_image(ADDRESS_IMG+"background.png");
             sprite.setTexture(textures);
             window.clear(Color::Black);
+
+
             window.draw(sprite);
             window.draw(arrow_left_sprite);
             window.draw(arrow_right_sprite);
-
-
             if(handle_event(event)==CLOSE)
             {
                 window.close();
                 abort();
             }
 
+            if(handle_event(event)==DOWN)
+                arr_left.event_handling(ARROW_DOWN_S);
 
+            if(handle_event(event)==ARROW_DOWN_S)
+                arr_right.event_handling(ARROW_DOWN_S);
+
+            if(handle_event(event)==UP)
+                arr_left.event_handling(ARROW_UP_OR_W);
             
+            if(handle_event(event)==ARROW_UP_OR_W)
+                arr_right.event_handling(ARROW_UP_OR_W);
+            
+            update_sprite(arrow_left_sprite,arr_left.get_pos_x(),arr_left.get_pos_y());
+            update_sprite(arrow_right_sprite,arr_right.get_pos_x(),arr_right.get_pos_y());
 
 
 
