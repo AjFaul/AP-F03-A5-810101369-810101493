@@ -4,6 +4,8 @@
 #include <string>
 #include <filesystem>
 #include <algorithm> 
+#include <map>
+#include <SFML/Audio.hpp>
 
 using namespace std;
 using namespace sf;
@@ -14,25 +16,29 @@ const int X_PAGE=1024;
 const int Y_PAGE=1024;
 //---------------------
 const string ADDRESS_IMG = "../img/";
+const string ADDRESS_SOUND = "../sound/";
 //---------------------
 const int START=1;
 const int INITIAL_TIME=2;
 const int IN_GAME=3;
+const int WINNER_MODE=4;
 //---------------------
 const int CLOSE=0;
 const int MOUSE_LEFT=1;
 const int ARROW_UP_OR_W=2;
 const int ARROW_DOWN_S=3;
-const int KEY_ENTER_OR_SPACE=4;
-
-
 const int UP=5;
 const int DOWN=6;
+
+const int KEY_ENTER=7;
+const int KEY_SPACE=8;
 //---------------------
 const int STOP_TIME_FIRST_GAME=2;
 //---------------------
 const int LEFT_ARROW=0;
 const int RIGHT_ARROW=1;
+//---------------------
+const float SPEED_GAME=8.f;
 
 
 class Player
@@ -40,13 +46,48 @@ class Player
 private:
     int health;
     string name ;
+    int last_sheep_size;
+    vector<int> queue={1,2,3};
+
+    void left_sheeps(){
+        int last_sheep=queue[2];
+        queue[2]=0;
+        last_sheep_size=last_sheep;
+    }
+
+    void shift_queue(){
+        for(int i=2;i>=0;i--){
+            if(i==0)
+                queue[i]=0;
+            else
+                queue[i]=queue[i-1];
+        }
+    }
+
+    void update_queue(){
+        for(int i=0;i<=2;i++){
+            if(queue[i]==0)
+                queue[i]=rand()%3+1;
+        }
+    }
+
 public:
+
     Player(string name_player){
         name=name_player;
         health=100;
     }
 
     ~Player(){}
+
+    void decrease_health(){
+        health-=10;
+        if(health<=0)
+            health=0;
+    }
+
+
+
 
     int get_health(){return health;}
 
@@ -60,6 +101,15 @@ public:
         else
             return 1;
     }
+
+    void send_sheep(){
+        left_sheeps();
+        shift_queue();
+        update_queue();
+    }
+
+    int get_last_sheep_size(){return last_sheep_size;}
+
 };
 
 
@@ -95,7 +145,9 @@ public:
             if(y>=900)
                 y=212;
             return 0;
-        case KEY_ENTER_OR_SPACE:
+        case KEY_ENTER:
+            return y;
+        case KEY_SPACE:
             return y;
         default:
             return 0;
@@ -155,7 +207,10 @@ int handle_event(const Event & event){
             return ARROW_DOWN_S;
 
         if(event.key.code==Keyboard::Enter)
-            return KEY_ENTER_OR_SPACE;
+            return KEY_ENTER;
+        
+        if(event.key.code==Keyboard::Space)
+            return KEY_SPACE;
     }
     return -1;
 }
@@ -181,11 +236,22 @@ void update_sprite(Sprite& sprite,float x, float y){
     sprite.setPosition(x,y);
 }
 
-
+int get_floor(int y)
+{
+    if(y<=300 && y>=100)
+        return 1;
+    if(y<=500 && y>=301)
+        return 2;
+    if(y<=700 && y>=501)
+        return 3;
+    if(y<=900 && y>=700)
+        return 4;
+    return 0;
+}
 
 void start_game()
 {
-    RenderWindow window(VideoMode(X_PAGE,Y_PAGE),"Animal Figth");
+    RenderWindow window(VideoMode(X_PAGE,Y_PAGE),"Animal Fight");
 
     //------------------------------------------------------
 
@@ -244,12 +310,66 @@ void start_game()
 
     vector<Sprite> flip_health_sprite={flip_health1_sprite,flip_health2_sprite,flip_health3_sprite,flip_health4_sprite};
     //------------------------------------------------------
+    Texture pig1;
+    pig1=set_image(ADDRESS_IMG+"pig1.png");
+    Sprite pig1sprite(pig1);
+
+    Texture pig2;
+    pig2=set_image(ADDRESS_IMG+"pig2.png");
+    Sprite pig2sprite(pig2);
+
+
+    Texture pig3;
+    pig3=set_image(ADDRESS_IMG+"pig3.png");
+    Sprite pig3sprite(pig3);
+
+
+    vector<Sprite> sheep_sprite_left={pig1sprite,pig2sprite,pig3sprite};
+
+    Texture pig_flip1;
+    pig_flip1=set_image(ADDRESS_IMG+"pig_flip1.png");
+    Sprite pig_flip1sprite(pig_flip1);
+
+    Texture pig_flip2;
+    pig_flip2=set_image(ADDRESS_IMG+"pig_flip2.png");
+    Sprite pig_flip2sprite(pig_flip2);
+
+    Texture pig_flip3;
+    pig_flip3=set_image(ADDRESS_IMG+"pig_flip3.png");
+    Sprite pig_flip3sprite(pig_flip3);
+
+    vector<Sprite> sheep_sprite_right={pig_flip1sprite,pig_flip2sprite,pig_flip3sprite};
+
+    //------------------------------------------------------
+    Texture Player1_win;
+    Player1_win=set_image(ADDRESS_IMG+"player1_win.png");
+    Sprite sprite_winner1(Player1_win);
+
+    Texture Player2_win;
+    Player2_win=set_image(ADDRESS_IMG+"player2_win.png");
+    Sprite sprite_winner2(Player2_win);
+    //------------------------------------------------------
+    Music winner_music;
+    winner_music.openFromFile(ADDRESS_SOUND+"winner.wav");
+
+    Music background_music;
+    background_music.openFromFile(ADDRESS_SOUND+"background_music.wav");
+
+    Music moshkel_dari;
+    moshkel_dari.openFromFile(ADDRESS_SOUND+"moshkel_dari.wav");
+
+    //------------------------------------------------------
 
     int status_game=START;
     Clock clock;
 
     while (window.isOpen())
     {
+        background_music.setLoop(true);
+        background_music.setVolume(50.f);
+        background_music.play();
+
+
         Event event;
         while (window.pollEvent(event) && status_game==START)
         {
@@ -292,14 +412,26 @@ void start_game()
 
         //----------------
         Arrow arr_left(LEFT_ARROW);
-        arrow_left_sprite.setPosition(arr_left.get_pos_x(),arr_left.event_handling(KEY_ENTER_OR_SPACE));
+        arrow_left_sprite.setPosition(arr_left.get_pos_x(),arr_left.event_handling(KEY_ENTER));
         //----------------
         Arrow arr_right(RIGHT_ARROW);
-        arrow_right_sprite.setPosition(arr_right.get_pos_x(),arr_right.event_handling(KEY_ENTER_OR_SPACE));
+        arrow_right_sprite.setPosition(arr_right.get_pos_x(),arr_right.event_handling(KEY_SPACE));
         //----------------
         Player amirabas("amirabas");
         Player ali("ali");
         //----------------
+        Clock clock_enter;
+        Clock clock_space;
+        //----------------
+        map <int , vector<Sprite>> sheep_sprite_L;
+        map <int , vector<Sprite>> sheep_sprite_R;
+        //----------------
+        int x;
+        //----------------
+        int last_sheep_left;
+        int last_sheep_right;
+        int floor=0;
+        int winner=0;
         //----------------
         while (status_game==IN_GAME)
         {
@@ -332,22 +464,100 @@ void start_game()
             if(handle_event(event)==ARROW_UP_OR_W)
                 arr_right.event_handling(ARROW_UP_OR_W);
             
-            update_sprite(arrow_left_sprite,arr_left.get_pos_x(),arr_left.get_pos_y());
-            update_sprite(arrow_right_sprite,arr_right.get_pos_x(),arr_right.get_pos_y());
 
+
+            if(handle_event(event)==KEY_ENTER)
+            {
+                if(clock_enter.getElapsedTime().asSeconds()>=3)
+                {
+                    background_music.play();
+                    //----------
+                    // moshkel_dari.pause();
+                    //----------
+                    
+                    floor=get_floor(arr_left.get_pos_y());
+                    amirabas.send_sheep();
+                    last_sheep_left=amirabas.get_last_sheep_size();
+                    sheep_sprite_L[floor].push_back(sheep_sprite_left[last_sheep_left-1]);
+                    sheep_sprite_L[floor][(sheep_sprite_L[floor]).size()-1].setPosition(60,190*floor);
+                    clock_enter.restart();
+                }else{
+                    // background_music.pause();
+                    // moshkel_dari.setLoop(true);
+                    // moshkel_dari.setVolume(50.f);
+                    // moshkel_dari.play();
+                    // continue;
+                }
+            }
+
+            if(handle_event(event)==KEY_SPACE)
+            {
+                if(clock_space.getElapsedTime().asSeconds()>=3)
+                {
+                    background_music.play();
+                    //----------
+                    // moshkel_dari.pause();
+                    //----------
+                    floor=get_floor(arr_right.get_pos_y());
+                    ali.send_sheep();
+                    last_sheep_right=ali.get_last_sheep_size();
+                    sheep_sprite_R[floor].push_back(sheep_sprite_right[last_sheep_right-1]);
+                    sheep_sprite_R[floor][(sheep_sprite_R[floor]).size()-1].setPosition(900,190*floor);
+                    clock_space.restart();
+                }else{
+                    // background_music.pause();
+                    // moshkel_dari.setLoop(true);
+                    // moshkel_dari.setVolume(50.f);
+                    // moshkel_dari.play();
+                    continue;
+                }
+            }
 
             
+            for(int i=1;i<=4;i++)
+            {
+                for(size_t j=0; j<sheep_sprite_L[i].size();j++)
+                {
+                    sheep_sprite_L[i][j].move(SPEED_GAME,0.0f);
+                    window.draw(sheep_sprite_L[i][j]);
+                    x=sheep_sprite_L[i][sheep_sprite_L[i].size()-1].getPosition().x;
+                    if(x>=900)
+                    {
+                        ali.decrease_health();
+                        sheep_sprite_L[i].pop_back();
+                    }
+                }
+                
+                for(size_t j=0; j<sheep_sprite_R[i].size();j++)
+                {
+                    sheep_sprite_R[i][j].move(-1*SPEED_GAME,0.0f);
+                    window.draw(sheep_sprite_R[i][j]);
+                    x=sheep_sprite_R[i][sheep_sprite_R[i].size()-1].getPosition().x;
+                    if(x<=100){
+                        amirabas.decrease_health();
+                        sheep_sprite_R[i].pop_back();
+                    }
+                }
+
+            }
+
+            if(amirabas.get_health()==0)
+            {
+                winner=1;
+                break;
+            }
+            if(ali.get_health()==0)
+            {
+                winner=2;
+                break;
+            }
 
 
 
 
 
-
-
-
-
-
-
+            update_sprite(arrow_left_sprite,arr_left.get_pos_x(),arr_left.get_pos_y());
+            update_sprite(arrow_right_sprite,arr_right.get_pos_x(),arr_right.get_pos_y());
 
             window.draw(health_sprite[amirabas.type_health() -1]);
             window.draw(flip_health_sprite[ali.type_health() -1]);
@@ -356,9 +566,29 @@ void start_game()
         }
         
 
+        window.pollEvent(event);
+        if(handle_event(event)==CLOSE)
+            window.close();
+        
+        if(winner==1)
+        {
+            background_music.pause();
+            sprite=sprite_winner1;
+            status_game=WINNER_MODE;
+            winner_music.setLoop(true);
+            winner_music.setVolume(50.f);
+            winner_music.play();
+        }
 
-
-
+        if(winner==2)
+        {
+            background_music.pause();
+            sprite=sprite_winner2;
+            status_game=WINNER_MODE;
+            winner_music.setLoop(true);
+            winner_music.setVolume(50.f);
+            winner_music.play();
+        }   
 
 
 
