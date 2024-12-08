@@ -351,6 +351,13 @@ void start_game()
     //------------------------------------------------------
     Music winner_music;
     winner_music.openFromFile(ADDRESS_SOUND+"winner.wav");
+
+    Music background_music;
+    background_music.openFromFile(ADDRESS_SOUND+"background_music.wav");
+
+    Music moshkel_dari;
+    moshkel_dari.openFromFile(ADDRESS_SOUND+"moshkel_dari.wav");
+
     //------------------------------------------------------
 
     int status_game=START;
@@ -358,6 +365,11 @@ void start_game()
 
     while (window.isOpen())
     {
+        background_music.setLoop(true);
+        background_music.setVolume(50.f);
+        background_music.play();
+
+
         Event event;
         while (window.pollEvent(event) && status_game==START)
         {
@@ -458,28 +470,47 @@ void start_game()
             {
                 if(clock_enter.getElapsedTime().asSeconds()>=3)
                 {
+                    background_music.play();
+                    //----------
+                    // moshkel_dari.pause();
+                    //----------
+                    
                     floor=get_floor(arr_left.get_pos_y());
                     amirabas.send_sheep();
                     last_sheep_left=amirabas.get_last_sheep_size();
                     sheep_sprite_L[floor].push_back(sheep_sprite_left[last_sheep_left-1]);
                     sheep_sprite_L[floor][(sheep_sprite_L[floor]).size()-1].setPosition(60,190*floor);
                     clock_enter.restart();
-                }else
-                    continue;
+                }else{
+                    // background_music.pause();
+                    // moshkel_dari.setLoop(true);
+                    // moshkel_dari.setVolume(50.f);
+                    // moshkel_dari.play();
+                    // continue;
+                }
             }
 
             if(handle_event(event)==KEY_SPACE)
             {
                 if(clock_space.getElapsedTime().asSeconds()>=3)
                 {
+                    background_music.play();
+                    //----------
+                    // moshkel_dari.pause();
+                    //----------
                     floor=get_floor(arr_right.get_pos_y());
                     ali.send_sheep();
                     last_sheep_right=ali.get_last_sheep_size();
                     sheep_sprite_R[floor].push_back(sheep_sprite_right[last_sheep_right-1]);
                     sheep_sprite_R[floor][(sheep_sprite_R[floor]).size()-1].setPosition(900,190*floor);
                     clock_space.restart();
-                }else
+                }else{
+                    // background_music.pause();
+                    // moshkel_dari.setLoop(true);
+                    // moshkel_dari.setVolume(50.f);
+                    // moshkel_dari.play();
                     continue;
+                }
             }
 
             
@@ -541,6 +572,7 @@ void start_game()
         
         if(winner==1)
         {
+            background_music.pause();
             sprite=sprite_winner1;
             status_game=WINNER_MODE;
             winner_music.setLoop(true);
@@ -550,6 +582,7 @@ void start_game()
 
         if(winner==2)
         {
+            background_music.pause();
             sprite=sprite_winner2;
             status_game=WINNER_MODE;
             winner_music.setLoop(true);
