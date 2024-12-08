@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <algorithm> 
 #include <map>
+#include <SFML/Audio.hpp>
 
 using namespace std;
 using namespace sf;
@@ -15,10 +16,12 @@ const int X_PAGE=1024;
 const int Y_PAGE=1024;
 //---------------------
 const string ADDRESS_IMG = "../img/";
+const string ADDRESS_SOUND = "../sound/";
 //---------------------
 const int START=1;
 const int INITIAL_TIME=2;
 const int IN_GAME=3;
+const int WINNER_MODE=4;
 //---------------------
 const int CLOSE=0;
 const int MOUSE_LEFT=1;
@@ -35,7 +38,7 @@ const int STOP_TIME_FIRST_GAME=2;
 const int LEFT_ARROW=0;
 const int RIGHT_ARROW=1;
 //---------------------
-const float SPEED_GAME=3.f;
+const float SPEED_GAME=8.f;
 
 
 class Player
@@ -79,6 +82,8 @@ public:
 
     void decrease_health(){
         health-=10;
+        if(health<=0)
+            health=0;
     }
 
 
@@ -336,6 +341,17 @@ void start_game()
     vector<Sprite> sheep_sprite_right={pig_flip1sprite,pig_flip2sprite,pig_flip3sprite};
 
     //------------------------------------------------------
+    Texture Player1_win;
+    Player1_win=set_image(ADDRESS_IMG+"player1_win.png");
+    Sprite sprite_winner1(Player1_win);
+
+    Texture Player2_win;
+    Player2_win=set_image(ADDRESS_IMG+"player2_win.png");
+    Sprite sprite_winner2(Player2_win);
+    //------------------------------------------------------
+    Music winner_music;
+    winner_music.openFromFile(ADDRESS_SOUND+"winner.wav");
+    //------------------------------------------------------
 
     int status_game=START;
     Clock clock;
@@ -403,6 +419,7 @@ void start_game()
         int last_sheep_left;
         int last_sheep_right;
         int floor=0;
+        int winner=0;
         //----------------
         while (status_game==IN_GAME)
         {
@@ -491,8 +508,20 @@ void start_game()
                     }
                 }
 
-            }  
-            
+            }
+
+            if(amirabas.get_health()==0)
+            {
+                winner=1;
+                break;
+            }
+            if(ali.get_health()==0)
+            {
+                winner=2;
+                break;
+            }
+
+
 
 
 
@@ -506,9 +535,27 @@ void start_game()
         }
         
 
+        window.pollEvent(event);
+        if(handle_event(event)==CLOSE)
+            window.close();
+        
+        if(winner==1)
+        {
+            sprite=sprite_winner1;
+            status_game=WINNER_MODE;
+            winner_music.setLoop(true);
+            winner_music.setVolume(50.f);
+            winner_music.play();
+        }
 
-
-
+        if(winner==2)
+        {
+            sprite=sprite_winner2;
+            status_game=WINNER_MODE;
+            winner_music.setLoop(true);
+            winner_music.setVolume(50.f);
+            winner_music.play();
+        }   
 
 
 
