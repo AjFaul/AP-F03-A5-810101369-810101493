@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -g
+CXXFLAGS = -std=c++20 -Wall -g
 SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-audio -lsfml-system
 TARGET = main
 SRC = main.cpp
